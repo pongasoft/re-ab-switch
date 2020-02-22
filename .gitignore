@@ -1,0 +1,11 @@
+Output
+*.plist
+Intermediate-llvm
+temp.txt
+*.pyc
+.idea/workspace.xml
+*.xcuserstate
+*.xcodeproj/project.xcworkspace
+*.xcodeproj/xcuserdata
+GUI
+.DS_Store
