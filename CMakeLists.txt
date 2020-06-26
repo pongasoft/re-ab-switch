@@ -39,7 +39,7 @@ set(RE_2D_RENDER_ROOT "${RE_SDK_ROOT}/../RE2DRender" CACHE PATH "Location of RE2
 # If RE_CMAKE_ROOT_DIR is undefined/empty, it will fetch/download it from github
 # If RE_CMAKE_ROOT_DIR is defined, it should point to the (local) folder where re-cmake is located
 set(RE_CMAKE_ROOT_DIR "")
-set(RE_CMAKE_ROOT_DIR "../../pongasoft/re-cmake")
+#set(RE_CMAKE_ROOT_DIR "../../pongasoft/re-cmake")
 include(cmake/re-cmake.cmake)
 
 # Defining where the sources of the plugin live
