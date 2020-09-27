@@ -85,6 +85,8 @@ set(re_sources_2d
 
     # Images for the device
     ${RE_2D_SRC_DIR}/81x14_5x5.png
+    ${RE_2D_SRC_DIR}/Cable_Attachment_CV_01_1frames.png
+    ${RE_2D_SRC_DIR}/Cable_Attachment_Audio_01_1frames.png
     ${RE_2D_SRC_DIR}/Placeholder.png
     ${RE_2D_SRC_DIR}/Reason_GUI_back_folded_root_panel.png
     ${RE_2D_SRC_DIR}/Reason_GUI_back_root_panel.png
@@ -121,10 +123,8 @@ set(re_sources_2d
     ${RE_2D_SRC_DIR}/Reason_TrackListIcon_back_root_panel.png
     ${RE_2D_SRC_DIR}/Reason_TrackListIcon_front_folded_root_panel.png
     ${RE_2D_SRC_DIR}/Reason_TrackListIcon_front_root_panel.png
-    ${RE_2D_SRC_DIR}/SharedAudioJack.png
-    ${RE_2D_SRC_DIR}/SharedCVJack.png
-    ${RE_2D_SRC_DIR}/TapeHorz.png
-    )
+    ${RE_2D_SRC_DIR}/Tape_Horizontal_1frames.png
+  )
 
 # Adding the RE plugin
 add_re_plugin(

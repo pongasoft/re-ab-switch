@@ -6,7 +6,7 @@ front = {
 	{
 		S_device_name = {
 			offset = {337*Q,27*Q},
-			{path="TapeHorz"},
+			{path="Tape_Horizontal_1frames"},
 		},
 		S_toggle_button_prop_audio_switch = {
 			offset = {120*Q,13*Q},
@@ -64,7 +64,7 @@ folded_front = {
 	{
 		S_device_name = {
 			offset = {337*Q,8*Q},
-			{path="TapeHorz"},
+			{path="Tape_Horizontal_1frames"},
 		},
 		S_sequence_meter_prop_soundOn = {
 			offset = {146*Q,9*Q},
@@ -102,7 +102,7 @@ back = {
 	{
 		S_device_name = {
 			offset = {45*Q,19*Q},
-			{path="TapeHorz"},
+			{path="Tape_Horizontal_1frames"},
 		},
 		S_placeholder = {
 			offset = {45*Q,34*Q},
@@ -110,47 +110,47 @@ back = {
 		},
 		S_audio_output_socket_audioOutputLeft = {
 			offset = {282*Q,27*Q},
-			{path="SharedAudioJack", frames = 3},
+			{path="Cable_Attachment_Audio_01_1frames"},
 		},
 		S_audio_output_socket_audioOutputRight = {
 			offset = {313*Q,27*Q},
-			{path="SharedAudioJack", frames = 3},
+			{path="Cable_Attachment_Audio_01_1frames"},
 		},
 		S_cv_input_socket_cvInAudio = {
 			offset = {346*Q,28*Q},
-			{path="SharedCVJack", frames = 3},
+			{path="Cable_Attachment_CV_01_1frames"},
 		},
 		S_cv_input_socket_cvInCv = {
 			offset = {628*Q,28*Q},
-			{path="SharedCVJack", frames = 3},
+			{path="Cable_Attachment_CV_01_1frames"},
 		},
 		S_cv_output_socket_cvOutput = {
 			offset = {590*Q,34*Q},
-			{path="SharedCVJack", frames = 3},
+			{path="Cable_Attachment_CV_01_1frames"},
 		},
 		S_audio_input_socket_audioInputLeftA = {
 			offset = {153*Q,27*Q},
-			{path="SharedAudioJack", frames = 3},
+			{path="Cable_Attachment_Audio_01_1frames"},
 		},
 		S_audio_input_socket_audioInputRightA = {
 			offset = {184*Q,27*Q},
-			{path="SharedAudioJack", frames = 3},
+			{path="Cable_Attachment_Audio_01_1frames"},
 		},
 		S_cv_input_socket_cvInputA = {
 			offset = {490*Q,34*Q},
-			{path="SharedCVJack", frames = 3},
+			{path="Cable_Attachment_CV_01_1frames"},
 		},
 		S_audio_input_socket_audioInputLeftB = {
 			offset = {218*Q,27*Q},
-			{path="SharedAudioJack", frames = 3},
+			{path="Cable_Attachment_Audio_01_1frames"},
 		},
 		S_audio_input_socket_audioInputRightB = {
 			offset = {249*Q,27*Q},
-			{path="SharedAudioJack", frames = 3},
+			{path="Cable_Attachment_Audio_01_1frames"},
 		},
 		S_cv_input_socket_cvInputB = {
 			offset = {540*Q,34*Q},
-			{path="SharedCVJack", frames = 3},
+			{path="Cable_Attachment_CV_01_1frames"},
 		},
 	},
 }
@@ -161,7 +161,7 @@ folded_back = {
 	{
 		S_device_name = {
 			offset = {594*Q,8*Q},
-			{path="TapeHorz"},
+			{path="Tape_Horizontal_1frames"},
 		},
 	},
 }
