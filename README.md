@@ -13,7 +13,7 @@ This project contains the full source code for the free rack extension A/B Audio
 
 ### Requirements
 
-* This project requires CMake (minimum version 3.13)
+* This project requires CMake (minimum version 3.13) properly installed (`cmake` executable must be in your `PATH`)
 * This project currently expects RE SDK 4.2.0 or 4.1.0 to be installed on the machine (it will not download it for you)
 * Due to the RE SDK requirements, this project also requires python 3 to be installed
 * It has been tested on macOS 10.14.6 with Xcode 9 installed
@@ -55,6 +55,9 @@ Running the `python3 configure.py -h` command will print the usage.
 > #### Note
 > Depending on how `python` is installed on your system you may have to invoke it differently.
 
+> #### Note
+> This script is expecting the `cmake` command line tool to be in the path (use `cmake -version` to confirm it is properly installed).
+
 If you have setup the RE SDK in its default location, as specified above, simply run `python3 configure.py` otherwise use the `-p` option to specify its location.
 
 #### Step 2 - Install the plugin
@@ -63,6 +66,9 @@ After running the configure script, simply go into the newly generated `build` f
 
 > #### Note
 > Simply run `re.sh -h` (resp. `re.bat -h`) for help with the command
+
+> #### Note
+> This script is expecting the `cmake` command line tool to be in the path (use `cmake -version` to confirm it is properly installed).
 
 #### Step 3 - Try the plugin
 
@@ -82,6 +88,7 @@ Release notes
 
 * Upgraded to use [re-cmake](https://github.com/pongasoft/re-cmake) (removed all unnecessary files  and added CMake build files) 
 * Upgraded to use RE SDK 4.2.0
+* Builds properly on Apple chipset
 
 #### 1.2.0 - 2016/03/13
 
