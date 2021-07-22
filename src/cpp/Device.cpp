@@ -1,9 +1,24 @@
 #include "Device.h"
 
-Device::Device()
+Device::Device() : fSampleRate{-1}
 {
+  JBOX_TRACE("Device()");
+
   fCurrentAudioState.registerForUpdate(fJBoxPropertyObserver, kAudioSwitchPropertyTag);
   fCurrentCVState.registerForUpdate(fJBoxPropertyObserver, kCVSwitchPropertyTag);
+}
+
+Device::Device(int iSampleRate) :fSampleRate{iSampleRate}
+{
+  JBOX_TRACE("Device(iSampleRate)");
+
+  fCurrentAudioState.registerForUpdate(fJBoxPropertyObserver, kAudioSwitchPropertyTag);
+  fCurrentCVState.registerForUpdate(fJBoxPropertyObserver, kCVSwitchPropertyTag);
+}
+
+Device::~Device()
+{
+  JBOX_TRACE("~Device()");
 }
 
 void Device::renderBatch(TJBox_PropertyDiff const iPropertyDiffs[], TJBox_UInt32 iDiffCount)
@@ -16,3 +31,4 @@ void Device::renderBatch(TJBox_PropertyDiff const iPropertyDiffs[], TJBox_UInt32
   fPreviousAudioState = fCurrentAudioState;
   fPreviousCVState = fCurrentCVState;
 }
+

@@ -38,10 +38,11 @@ TJBox_Float64* createConstantPowerXFadeFunction(int size)
 
 TJBox_Float64* createLinearXFadeFunction(int size)
 {
+  JBOX_ASSERT(size > 1)
   TJBox_Float64* vXFadeFunction = new TJBox_Float64[size];
   for(int i = 0; i < size; i++)
   {
-    vXFadeFunction[i] = (double) i / size;
+    vXFadeFunction[i] = (double) i / (size - 1.0);
   }
   return vXFadeFunction;
 }
@@ -64,23 +65,6 @@ ABAudioSwitch::ABAudioSwitch()
 */
 void ABAudioSwitch::renderBatch(const ABAudioSwitchState &previousState, ABAudioSwitchState &currentState)
 {
-//    if(iDiffCount != 0)
-//    {
-//      for(TJBox_UInt32 i = 0; i < iDiffCount; i++)
-//      {
-//        TJBox_PropertyDiff iPropertyDiff = iPropertyDiffs[i];
-//
-//        TJBox_Value values[] = {
-//         iPropertyDiff.fPreviousValue,
-//         iPropertyDiff.fCurrentValue,
-//         JBox_MakeNumber(iPropertyDiff.fPropertyTag),
-//         JBox_MakeNumber(iPropertyDiff.fAtFrameIndex)
-//        };
-//
-//        JBOX_TRACEVALUES("ABAudioSwitch.render diff ^0 -> ^1 @^2 [^3]", values, 4);
-//      }
-//    }
-
   ESwitchState currentSwitchState = currentState.computeSwitchState(previousState);
 
   // no need to do anything if output is not connected...

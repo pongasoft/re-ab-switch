@@ -20,13 +20,19 @@
 class Device {
 public:
   Device();
+  explicit Device(int iSampleRate);
+  ~Device();
 
   /**
   * @brief	Main starting point for rendering audio
   **/
   void renderBatch(const TJBox_PropertyDiff iPropertyDiffs[], TJBox_UInt32 iDiffCount);
 
+  inline int getSampleRate() const { return fSampleRate; }
+
 private:
+  int fSampleRate;
+
   JBoxPropertyObserver fJBoxPropertyObserver;
   ABAudioSwitchState fPreviousAudioState;
   ABAudioSwitchState fCurrentAudioState;

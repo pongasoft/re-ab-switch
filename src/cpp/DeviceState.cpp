@@ -26,46 +26,7 @@ void DeviceState::registerForUpdate(JBoxPropertyObserver &observer, TJBox_Tag iS
 
 ESwitchState DeviceState::computeSwitchState(DeviceState const &previousState)
 {
-  ESwitchState vCurrentKnobState = getKnobState();
-
-//  TJBox_Value values[] = {
-//    iPropertyDiff.fPreviousValue,
-//    iPropertyDiff.fCurrentValue,
-//    JBox_MakeNumber(iPropertyDiff.fPropertyTag),
-//    JBox_MakeNumber(iPropertyDiff.fAtFrameIndex),
-//    JBox_MakeBoolean(updated)
-//  };
-//
-//  JBOX_TRACEVALUES("DeviceState::computeSwitchState ", values, 5);
-
-  // cv in connected?
-  if(isCVInConnected())
-  {
-    ESwitchState vCurrentReadCvInState = getCVInState();
-
-    // when knob changes => takes precedence
-    if(vCurrentKnobState != previousState.getKnobState())
-    {
-      fComputedSwitchState = vCurrentKnobState;
-    }
-    else
-    {
-      if(vCurrentReadCvInState != previousState.getCVInState())
-      {
-        fComputedSwitchState = vCurrentReadCvInState;
-      }
-      else
-      {
-        // otherwise nothing has changed => keep previous value
-        fComputedSwitchState = previousState.getComputedSwitchState();
-      }
-    }
-  }
-  else
-  {
-    // cv not connected => value comes from knob
-    fComputedSwitchState = vCurrentKnobState;
-  }
+  fComputedSwitchState = isCVInConnected() ? getCVInState() : getKnobState();
 
   // update the led lights corresponding to the state of the switch
   fLedAJBoxProperty.storeValueToMotherboardOnUpdate(fComputedSwitchState == kA, previousState.fLedAJBoxProperty);
