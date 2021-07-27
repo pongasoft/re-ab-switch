@@ -2,66 +2,12 @@
 #include <Device.h>
 #include <re/mock/Rack.h>
 #include <re/mock/MockDevices.h>
+#include <re_cmake_build.h>
 
 using namespace re::mock;
 
 auto newABSwitch(Rack &iRack) {
-  Config c = Config::byDefault<Device>([](LuaJbox &jbox, MotherboardDef &def, RealtimeController &rtc, Realtime &rt) {
-    std::array<char const *, 2> inputs{"A", "B"};
-
-    // motherboard_def.lua
-    def.rt_owner.properties["prop_soundOn"] = jbox.boolean(false);
-
-    for(auto input: inputs) {
-      def.audio_inputs[fmt::printf("audioInputLeft%s", input)] = jbox.audio_input();
-      def.audio_inputs[fmt::printf("audioInputRight%s", input)] = jbox.audio_input();
-      def.cv_inputs[fmt::printf("cvInput%s", input)] = jbox.cv_input();
-      def.rt_owner.properties[fmt::printf("prop_audio_led%s", input)] = jbox.boolean(false);
-      def.rt_owner.properties[fmt::printf("prop_cv_led%s", input)] = jbox.boolean(false);
-    }
-
-    def.cv_inputs["cvInAudio"] = jbox.cv_input();
-    def.cv_inputs["cvInCv"] = jbox.cv_input();
-    def.cv_outputs["cvOutput"] = jbox.cv_output();
-
-    def.audio_outputs["audioOutputLeft"] = jbox.audio_output();
-    def.audio_outputs["audioOutputRight"] = jbox.audio_output();
-
-    def.document_owner.properties["prop_audio_switch"] = jbox.boolean({.property_tag = 100, .default_value = false});
-    def.document_owner.properties["prop_xfade_switch"] = jbox.boolean({.property_tag = 101, .default_value = false});
-    def.document_owner.properties["prop_cv_switch"] = jbox.boolean({.property_tag = 200, .default_value = false});
-
-    // realtime_controller.lua
-    rtc.rt_input_setup.notify = {
-      "/cv_inputs/cvInAudio/connected",
-      "/cv_inputs/cvInAudio/value",
-      "/cv_inputs/cvInCv/connected",
-      "/cv_inputs/cvInCv/value",
-      "/cv_inputs/cvInputA/connected",
-      "/cv_inputs/cvInputA/value",
-      "/cv_inputs/cvInputB/connected",
-      "/cv_inputs/cvInputB/value",
-
-      "/cv_outputs/cvOutput/connected",
-
-      "/audio_inputs/audioInputLeftA/connected",
-      "/audio_inputs/audioInputRightA/connected",
-      "/audio_inputs/audioInputLeftB/connected",
-      "/audio_inputs/audioInputRightB/connected",
-
-      "/audio_outputs/audioOutputLeft/connected",
-      "/audio_outputs/audioOutputRight/connected",
-
-      "/custom_properties/prop_audio_switch",
-      "/custom_properties/prop_cv_switch",
-      "/custom_properties/prop_xfade_switch",
-    };
-
-    // rt
-    rt.create_native_object = JBox_Export_CreateNativeObject; // use actual function for test
-    rt.render_realtime = JBox_Export_RenderRealtime;          // use actual function for test
-  });
-
+  auto c = DeviceConfig<Device>::fromJBoxExport(RE_CMAKE_MOTHERBOARD_DEF_LUA, RE_CMAKE_REALTIME_CONTROLLER_LUA);
   return iRack.newDevice<Device>(c);
 }
 
@@ -165,10 +111,10 @@ TEST(Device, AudioSwitch)
 
   auto abSwitch = newABSwitch(rack);
 
-  auto srcA = rack.newDevice<MAUSrc>(MAUSrc::Config);
-  auto srcB = rack.newDevice<MAUSrc>(MAUSrc::Config);
-  auto dst = rack.newDevice<MAUDst>(MAUDst::Config);
-  auto srcCV = rack.newDevice<MCVSrc>(MCVSrc::Config);
+  auto srcA = rack.newDevice<MAUSrc>(MAUSrc::CONFIG);
+  auto srcB = rack.newDevice<MAUSrc>(MAUSrc::CONFIG);
+  auto dst = rack.newDevice<MAUDst>(MAUDst::CONFIG);
+  auto srcCV = rack.newDevice<MCVSrc>(MCVSrc::CONFIG);
 
   MockAudioDevice::wire(rack, abSwitch.getStereoAudioOutSocket("audioOutputLeft", "audioOutputRight"), dst);
 
