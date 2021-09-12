@@ -89,6 +89,7 @@ Release notes
 * Upgraded to use [re-cmake](https://github.com/pongasoft/re-cmake) (removed all unnecessary files  and added CMake build files) 
 * Upgraded to use RE SDK 4.2.0
 * Builds properly on Apple chipset
+* Use [re-mock](https://github.com/pongasoft/re-mock) for testing
 
 #### 1.2.0 - 2016/03/13
 
