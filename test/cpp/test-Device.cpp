@@ -1,16 +1,12 @@
 #include <gtest/gtest.h>
 #include <Device.h>
-#include <re/mock/Rack.h>
-#include <re/mock/MockDevices.h>
+#include <re/mock/DeviceTesters.h>
 #include <re_cmake_build.h>
 
 using namespace re::mock;
 
-auto newABSwitch(Rack &iRack) {
-  auto c = DeviceConfig<Device>::fromJBoxExport(RE_CMAKE_MOTHERBOARD_DEF_LUA, RE_CMAKE_REALTIME_CONTROLLER_LUA);
-  return iRack.newDevice<Device>(c);
-}
-
+/**
+ * Represents the state of the device from an external point of view */
 struct State
 {
   static constexpr bool A = false;
@@ -40,8 +36,10 @@ struct State
     return os << s.to_string();  // whatever needed to print bar to os
   }
 
-  static State from(Rack::ExtensionDevice<Device> &re)
+  static State from(HelperTester<Device> &iTester)
   {
+    auto re = iTester.device();
+    
     return {
       .soundOn = re.getBool("/custom_properties/prop_soundOn"),
       .audioLEDA = re.getBool("/custom_properties/prop_audio_ledA"),
@@ -93,39 +91,34 @@ MockAudioDevice::StereoBuffer xfade(MockAudioDevice::StereoBuffer const &iFromBu
 // Device - SampleRate
 TEST(Device, SampleRate)
 {
-  Rack rack{};
+  auto c = DeviceConfig<Device>::fromJBoxExport(RE_CMAKE_MOTHERBOARD_DEF_LUA, RE_CMAKE_REALTIME_CONTROLLER_LUA);
+  auto tester = HelperTester<Device>(c);
 
-  // this tests the creation of the device
-  auto abSwitch = newABSwitch(rack);
-
-  ASSERT_EQ(44100, abSwitch->getSampleRate());
+  ASSERT_EQ(44100, tester.device()->getSampleRate());
 
   State s{};
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
 }
 
 // Device - AudioSwitch
 TEST(Device, AudioSwitch)
 {
-  Rack rack{};
+  auto c = DeviceConfig<Device>::fromJBoxExport(RE_CMAKE_MOTHERBOARD_DEF_LUA, RE_CMAKE_REALTIME_CONTROLLER_LUA);
+  auto tester = HelperTester<Device>(c);
 
-  auto abSwitch = newABSwitch(rack);
-
-  auto srcA = rack.newDevice<MAUSrc>(MAUSrc::CONFIG);
-  auto srcB = rack.newDevice<MAUSrc>(MAUSrc::CONFIG);
-  auto dst = rack.newDevice<MAUDst>(MAUDst::CONFIG);
-  auto srcCV = rack.newDevice<MCVSrc>(MCVSrc::CONFIG);
-
-  MockAudioDevice::wire(rack, abSwitch.getStereoAudioOutSocket("audioOutputLeft", "audioOutputRight"), dst);
+  auto srcA = tester.wireNewAudioSrc();
+  auto srcB = tester.wireNewAudioSrc();
+  auto dst = tester.wireNewAudioDst("audioOutputLeft", "audioOutputRight");
+  auto srcCV = tester.wireNewCVSrc();
 
   State s{};
 
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
 
   /*******************************/////////////******************************/
   /*                             < FIRST FRAME >                            */
   /*******************************/////////////******************************/
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks //////////
 
@@ -133,7 +126,7 @@ TEST(Device, AudioSwitch)
   // no input connected => audio should stay at 0
   s.audioLEDA = true;
   s.cvLEDA = true;
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(0, 0));
 
   /*******************************////////////*******************************/
@@ -141,14 +134,14 @@ TEST(Device, AudioSwitch)
   /*******************************////////////*******************************/
   ////////// Action - wiring srcA -> abSwitch, srcB -> abSwitch //////////
 
-  MockAudioDevice::wire(rack, srcA, abSwitch.getStereoAudioInSocket("audioInputLeftA", "audioInputRightA"));
-  MockAudioDevice::wire(rack, srcB, abSwitch.getStereoAudioInSocket("audioInputLeftB", "audioInputRightB"));
+  tester.wire(srcA, "audioInputLeftA", "audioInputRightA");
+  tester.wire(srcB, "audioInputLeftB", "audioInputRightB");
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks - input is still 0/0 //////////
 
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(0, 0));
 
   /*******************************////////////*******************************/
@@ -159,13 +152,13 @@ TEST(Device, AudioSwitch)
   srcA->fBuffer.fill(1.0, 2.0);
   srcB->fBuffer.fill(3.0, 4.0);
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks //////////
 
   // since A is selected, we should get 1/2
   s.soundOn = true; // not 0 => soundOn is true
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(1.0, 2.0));
 
   /*******************************////////////*******************************/
@@ -174,9 +167,9 @@ TEST(Device, AudioSwitch)
   ////////// Action - we switch to B //////////
 
   s.audioSwitch = State::B;
-  abSwitch.setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
+  tester.device().setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks - srcB should now be the output //////////
 
@@ -184,7 +177,7 @@ TEST(Device, AudioSwitch)
   s.audioLEDA = false;
   s.audioLEDB = true;
 
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(3.0, 4.0));
 
   /*******************************////////////*******************************/
@@ -193,13 +186,13 @@ TEST(Device, AudioSwitch)
   ////////// Action - turn on xfade //////////
 
   s.xFade = true;
-  abSwitch.setBool("/custom_properties/prop_xfade_switch", s.xFade);
+  tester.device().setBool("/custom_properties/prop_xfade_switch", s.xFade);
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks - same output (xfade only applies on switching) //////////
 
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(3.0, 4.0));
 
   /*******************************////////////*******************************/
@@ -208,9 +201,9 @@ TEST(Device, AudioSwitch)
   ////////// Action - we switch to A //////////
 
   s.audioSwitch = State::A;
-  abSwitch.setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
+  tester.device().setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks - srcA should now be the output but it should cross fade //////////
 
@@ -218,7 +211,7 @@ TEST(Device, AudioSwitch)
   s.audioLEDA = true;
   s.audioLEDB = false;
 
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, xfade(MockAudioDevice::buffer(3.0, 4.0), MockAudioDevice::buffer(1.0, 2.0)));
 
   /*******************************////////////*******************************/
@@ -229,18 +222,18 @@ TEST(Device, AudioSwitch)
   // negative CV value will trigger the A input.
 
   s.xFade = false;
-  abSwitch.setBool("/custom_properties/prop_xfade_switch", s.xFade);
-  MockCVDevice::wire(rack, srcCV, abSwitch.getCVInSocket("cvInAudio"));
+  tester.device().setBool("/custom_properties/prop_xfade_switch", s.xFade);
+  tester.wire(srcCV, "cvInAudio");
   srcCV->fValue = 0;
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks - srcB should now be the output //////////
 
   // led lights switched
   s.audioLEDA = false;
   s.audioLEDB = true;
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(3.0, 4.0));
 
   /*******************************////////////*******************************/
@@ -249,13 +242,13 @@ TEST(Device, AudioSwitch)
   ////////// Action - we switch to B //////////
 
   s.audioSwitch = State::B;
-  abSwitch.setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
+  tester.device().setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks - srcB remains the output //////////
 
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(3.0, 4.0));
 
   /*******************************////////////*******************************/
@@ -264,13 +257,13 @@ TEST(Device, AudioSwitch)
   ////////// Action - we switch to A //////////
 
   s.audioSwitch = State::A;
-  abSwitch.setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
+  tester.device().setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks - srcB remains the output (CV override) //////////
 
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(3.0, 4.0));
 
   /*******************************////////////*******************************/
@@ -280,14 +273,14 @@ TEST(Device, AudioSwitch)
 
   srcCV->fValue = -1.0;
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks - srcA is now the output //////////
 
   // led lights switched
   s.audioLEDA = true;
   s.audioLEDB = false;
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(1.0, 2.0));
 
   /*******************************////////////*******************************/
@@ -297,14 +290,14 @@ TEST(Device, AudioSwitch)
 
   srcCV->fValue = 1.0;
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks - srcB is now the output //////////
 
   // led lights switched
   s.audioLEDA = false;
   s.audioLEDB = true;
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(3.0, 4.0));
 
   /*******************************////////////*******************************/
@@ -312,16 +305,16 @@ TEST(Device, AudioSwitch)
   /*******************************////////////*******************************/
   ////////// Action - we disconnect CV //////////
 
-  rack.unwire(srcCV.getCVOutSocket(MCVSrc::SOCKET));
+  tester.unwire(srcCV);
 
-  rack.nextFrame();
+  tester.nextFrame();
 
   ////////// Checks - srcA is now the output //////////
 
   // led lights switched
   s.audioLEDA = true;
   s.audioLEDB = false;
-  ASSERT_EQ(s, State::from(abSwitch));
+  ASSERT_EQ(s, State::from(tester));
   ASSERT_EQ(dst->fBuffer, MockAudioDevice::buffer(1.0, 2.0));
 
 
