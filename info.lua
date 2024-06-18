@@ -15,6 +15,7 @@ product_id = "com.pongasoft.ABSwitch"
 manufacturer = "pongasoft"
 version_number = "1.2.0f1"
 device_type = "helper"
+device_categories = {"CV Processor", "Misc"}
 supports_patches = false
 accepts_notes = false
 auto_create_track = false
