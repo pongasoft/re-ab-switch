@@ -7,6 +7,7 @@
 //
 
 #include "ABAudioSwitch.h"
+#include <logging.h>
 #include <cmath>
 
 /*
@@ -49,7 +50,7 @@ TJBox_Float64* createLinearXFadeFunction(int size)
 
 ABAudioSwitch::ABAudioSwitch()
 {
-  JBOX_TRACE("ABAudioSwitch()");
+  DLOG_F(INFO, "ABAudioSwitch()");
 
   // initializes the buffers
   fLeftAudioBuffer = new TJBox_AudioSample[kBatchSize];
@@ -81,7 +82,7 @@ void ABAudioSwitch::renderBatch(const ABAudioSwitchState &previousState, ABAudio
   vAudioInput.readAudio(fLeftAudioBuffer, fRightAudioBuffer);
 
   if (isXFade(previousState, currentState)) {
-//    JBOX_TRACE("ABAudioSwitch.render xfading...");
+//    DLOG_F(INFO, "ABAudioSwitch.render xfading...");
 
     StereoInPair &vAudioXFadeInput =
       currentSwitchState == kA ? currentState.fInputBStereoPair : currentState.fInputAStereoPair;

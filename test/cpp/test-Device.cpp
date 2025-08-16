@@ -74,9 +74,9 @@ MockAudioDevice::buffer_type xfade(MockAudioDevice::buffer_type const &iFromBuff
                                    MockAudioDevice::buffer_type const &iToBuffer)
 {
   MockAudioDevice::buffer_type res{};
-  for(int i = 0; i < MockAudioDevice::NUM_SAMPLES_PER_FRAME; i++)
+  for(int i = 0; i < Rack::kNumSamplesPerBatch; i++)
   {
-    double f = static_cast<double>(i) / (MockAudioDevice::NUM_SAMPLES_PER_FRAME - 1.0);
+    double f = static_cast<double>(i) / (Rack::kNumSamplesPerBatch - 1.0);
     res[i] = (iToBuffer[i] * f) + (iFromBuffer[i] * (1.0 - f));
   }
   return res;
@@ -91,7 +91,7 @@ MockAudioDevice::StereoBuffer xfade(MockAudioDevice::StereoBuffer const &iFromBu
 // Device - SampleRate
 TEST(Device, SampleRate)
 {
-  auto c = DeviceConfig<Device>::fromJBoxExport(RE_CMAKE_MOTHERBOARD_DEF_LUA, RE_CMAKE_REALTIME_CONTROLLER_LUA);
+  auto c = DeviceConfig<Device>::fromJBoxExport(RE_CMAKE_PROJECT_DIR);
   auto tester = HelperTester<Device>(c);
 
   ASSERT_EQ(44100, tester.device()->getSampleRate());
@@ -103,7 +103,7 @@ TEST(Device, SampleRate)
 // Device - AudioSwitch
 TEST(Device, AudioSwitch)
 {
-  auto c = DeviceConfig<Device>::fromJBoxExport(RE_CMAKE_MOTHERBOARD_DEF_LUA, RE_CMAKE_REALTIME_CONTROLLER_LUA);
+  auto c = DeviceConfig<Device>::fromJBoxExport(RE_CMAKE_PROJECT_DIR);
   auto tester = HelperTester<Device>(c);
 
   auto srcA = tester.wireNewAudioSrc();
@@ -118,7 +118,7 @@ TEST(Device, AudioSwitch)
   /*******************************/////////////******************************/
   /*                             < FIRST FRAME >                            */
   /*******************************/////////////******************************/
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks //////////
 
@@ -137,7 +137,7 @@ TEST(Device, AudioSwitch)
   tester.wire(srcA, "audioInputLeftA", "audioInputRightA");
   tester.wire(srcB, "audioInputLeftB", "audioInputRightB");
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks - input is still 0/0 //////////
 
@@ -152,7 +152,7 @@ TEST(Device, AudioSwitch)
   srcA->fBuffer.fill(1.0, 2.0);
   srcB->fBuffer.fill(3.0, 4.0);
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks //////////
 
@@ -169,7 +169,7 @@ TEST(Device, AudioSwitch)
   s.audioSwitch = State::B;
   tester.device().setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks - srcB should now be the output //////////
 
@@ -188,7 +188,7 @@ TEST(Device, AudioSwitch)
   s.xFade = true;
   tester.device().setBool("/custom_properties/prop_xfade_switch", s.xFade);
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks - same output (xfade only applies on switching) //////////
 
@@ -203,7 +203,7 @@ TEST(Device, AudioSwitch)
   s.audioSwitch = State::A;
   tester.device().setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks - srcA should now be the output but it should cross fade //////////
 
@@ -226,7 +226,7 @@ TEST(Device, AudioSwitch)
   tester.wire(srcCV, "cvInAudio");
   srcCV->fValue = 0;
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks - srcB should now be the output //////////
 
@@ -244,7 +244,7 @@ TEST(Device, AudioSwitch)
   s.audioSwitch = State::B;
   tester.device().setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks - srcB remains the output //////////
 
@@ -259,7 +259,7 @@ TEST(Device, AudioSwitch)
   s.audioSwitch = State::A;
   tester.device().setBool("/custom_properties/prop_audio_switch", s.audioSwitch);
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks - srcB remains the output (CV override) //////////
 
@@ -273,7 +273,7 @@ TEST(Device, AudioSwitch)
 
   srcCV->fValue = -1.0;
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks - srcA is now the output //////////
 
@@ -290,7 +290,7 @@ TEST(Device, AudioSwitch)
 
   srcCV->fValue = 1.0;
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks - srcB is now the output //////////
 
@@ -307,7 +307,7 @@ TEST(Device, AudioSwitch)
 
   tester.unwire(srcCV);
 
-  tester.nextFrame();
+  tester.nextBatch();
 
   ////////// Checks - srcA is now the output //////////
 

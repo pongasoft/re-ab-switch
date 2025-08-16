@@ -14,7 +14,7 @@ This project contains the full source code for the free rack extension A/B Audio
 ### Requirements
 
 * This project requires CMake (minimum version 3.13) properly installed (`cmake` executable must be in your `PATH`)
-* This project currently expects RE SDK 4.2.0 or 4.1.0 to be installed on the machine (it will not download it for you)
+* This project currently expects RE SDK 4.6.0 to be installed on the machine (it will not download it for you)
 * Due to the RE SDK requirements, this project also requires python 3 to be installed
 * It has been tested on macOS 10.14.6 with Xcode 9 installed
 * It has been tested on Windows 10 with Visual Studio 16 2019 build tools
@@ -86,10 +86,11 @@ Release notes
 
 #### master (unreleased)
 
-* Upgraded to use [re-cmake](https://github.com/pongasoft/re-cmake) (removed all unnecessary files  and added CMake build files) 
-* Upgraded to use RE SDK 4.2.0
+* Upgraded to use [re-cmake](https://github.com/pongasoft/re-cmake) (removed all unnecessary files and added CMake build files) 
+* Upgraded to use RE SDK 4.6.0
 * Builds properly on Apple chipset
 * Use [re-mock](https://github.com/pongasoft/re-mock) for testing
+* Use [re-logging](https://github.com/pongasoft/re-logging) for logging
 
 #### 1.2.0 - 2016/03/13
 

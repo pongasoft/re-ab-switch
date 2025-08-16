@@ -1,6 +1,7 @@
 #include <Jukebox.h>
 #include <cstring>
 #include "Device.h"
+#include <logging.h>
 
 /**
 * This static function is the factory to create native objects. Native objects are created in the lua file called
@@ -8,9 +9,11 @@
 */
 void *JBox_Export_CreateNativeObject(const char iOperation[], const TJBox_Value iParams[], TJBox_UInt32 iCount)
 {
+  RE_LOGGING_INIT_FOR_RE("ABSwitch");
+  
   if(std::strcmp(iOperation, "Instance") == 0)
   {
-    JBOX_TRACE("CreateNativeObject  / Instance");
+    DLOG_F(INFO, "CreateNativeObject  / Instance");
 
     if(iCount >= 1)
     {
